@@ -1,103 +1,246 @@
-import Image from "next/image";
+"use client";
+import { useState, useEffect, ChangeEvent } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import AddProducts from "./_components/AddProducts";
+import Products from "./_components/Products";
+import Cart from "./_components/Cart";
 
-export default function Home() {
+type products = {
+  productName: string;
+  price: number;
+  stock: number;
+  id: number;
+};
+
+type inputValues = {
+  productName: string;
+  price: number;
+  stock: number;
+};
+type newCardProductType = {
+  name: string;
+  productPrice: number;
+  id: number;
+  count: number;
+};
+
+type totalNumType = {
+  sum: number;
+};
+function Page() {
+  const [total, setTotal] = useState<totalNumType>(0);
+  const [products, setProducts] = useState<products[]>([]);
+  const [newCardProduct, setnewCardProduct] = useState<newCardProductType[]>(
+    []
+  );
+  const [inputValues, setIputValues] = useState<inputValues>({
+    productName: "",
+    price: 0,
+    stock: 0,
+  });
+  const handleInputValue = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setIputValues({
+      ...inputValues,
+      [name]: value,
+    });
+  };
+
+  const addproducts = () => {
+    if (inputValues.price === 0) return;
+    if (inputValues.productName === "") return;
+    if (inputValues.stock === 0) return;
+    setProducts([
+      ...products,
+      {
+        productName: inputValues.productName,
+        price: inputValues.price,
+        stock: inputValues.stock,
+        id: Date.now(),
+      },
+    ]);
+  };
+  const addproducts2 = (product: products) => {
+    const atId = product.id;
+    const filteredProduct = products.filter((product) => product.id !== atId);
+    setProducts([
+      ...filteredProduct,
+      {
+        ...product,
+        stock: Number(product.stock) - 1,
+      },
+    ]);
+
+    const newCardProduct = {
+      name: product.productName,
+      productPrice: product.price,
+      id: product.id,
+      count: 1,
+    };
+    console.log(newCardProduct);
+  
+    setnewCardProduct((prev) => {
+      const sameId = prev.find(
+        (prevProduct: newCardProductType) =>
+          prevProduct.id === newCardProduct.id
+      );
+      if (sameId) {
+        return prev.map((prevProduct) => {
+          return prevProduct.id === newCardProduct.id
+            ? { ...prevProduct, count: Number(prevProduct.count) + 1 }
+            : prevProduct;
+        });
+      } else {
+        return [...prev, newCardProduct];
+      }
+    });
+  };
+  const deleteBtn = (id: number) => {
+    const filtered = products.filter((product) => {
+      return product.id !== id;
+    });
+    setProducts(filtered);
+    const filteredCart = newCardProduct.filter((cartProduct) => {
+      return cartProduct.id !== id;
+    });
+    setnewCardProduct(filteredCart);
+  };
+
+  const totalNum = (total: newCardProductType) => {
+    let sum = 0;
+     sum = sum + total.productPrice * total.count ;
+     setTotal(sum)
+    console.log(sum, "total");
+  };
+
+  console.log(newCardProduct, "card");
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <div className="ml-7 mt-5 ">
+      <div className="text-center text-2xl font-bold">Product Store</div>
+      <div className="flex justify-center">
+        <div className="w-[850px] h-[140px] bg-gray-200 rounded-sm p-4 mt-5 shadow-xl/20">
+          <div className="font-bold text-2xl mb-3">Add Product</div>
+          <div className="flex gap-6 ">
+            <Input
+              className="w-[270px] h-[37px] border-1 border-black"
+              placeholder="Product Name"
+              name="productName"
+              value={inputValues.productName}
+              onChange={(e) => handleInputValue(e)}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <Input
+              className="w-[270px] h-[37px] border-1 border-black"
+              placeholder="Price"
+              name="price"
+              value={inputValues.price}
+              onChange={(e) => handleInputValue(e)}
+            />
+            <Input
+              className="w-[270px] h-[37px] border-1 border-black"
+              placeholder="Stock"
+              name="stock"
+              value={inputValues.stock}
+              onChange={(e) => handleInputValue(e)}
+            />
+            <Button
+              variant="outline"
+              onClick={addproducts}
+              className="bg-blue-400 text-white hover:bg-blue-700 hover:text-white"
+            >
+              Add
+            </Button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+      <div className="flex gap-20 justify-center mt-5">
+        <div>
+          <div>
+            <div className="font-bold text-2xl">
+              Products ({products.length})
+            </div>
+            {products.map((product, index) => {
+              return (
+                <div
+                  key={index}
+                  className="w-[400px] h-[120px] border-1 border-gray-800 rounded-sm pt-2 pl-2 mb-4 shadow-xl"
+                >
+                  <div className="flex gap-30">
+                    <div className="text-2xl">{product?.productName}</div>
+                    <div className="flex gap-3 ">
+                      <Button className="text-blue-400 border border-blue-300 bg-white hover:bg-blue-800 hover:text-white">
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => deleteBtn(product.id)}
+                        className="text-red-500 border border-red-500 bg-white hover:bg-red-800 hover:text-white"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex ">
+                    <div className="flex gap-1.5">
+                      <div className="text-gray-500">${product?.price}</div>
+                      <div>*</div>
+                      <div className="text-gray-500">
+                        Stock : {product?.stock}
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    className="bg-green-400 hover:bg-green-800"
+                    onClick={() => addproducts2(product)}
+                  >
+                    Add to Cart
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div>
+          <div className="font-bold text-2xl">
+            Cart ( {newCardProduct.length} items)
+          </div>
+          <div className="border-1 border-black rounded-sm shadow-xl">
+            {newCardProduct.map((product, index) => {
+              return (
+                <div key={index}>
+                  <div className="flex gap-40 p-3 justify-between">
+                    <div>
+                      <div className="text-2xl">{product.name}</div>
+                      <div className="text-gray-500">
+                        ${product.productPrice} each
+                      </div>
+                    </div>
+                    <div className="flex flex-row gap-3">
+                      <Input
+                        type="number"
+                        className="w-[60px] h-[35px] border-1 border-black"
+                        value={product.count}
+                      />
+                      <div className="mt-2">
+                        ${product.productPrice * product.count}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <hr className="border-t border-black mt-2 ml-4 mr-4"></hr>
+                    <hr className="border-t border-black mt-2 ml-4 mr-4"></hr>
+                  </div>
+                </div>
+              );
+            })}
+            <div className="flex justify-between p-4">
+              <div className="font-bold">Total:</div>
+              <div className="font-bold">$</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+
+export default Page;
