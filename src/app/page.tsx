@@ -25,11 +25,11 @@ type newCardProductType = {
   count: number;
 };
 
-type totalNumType = {
-  sum: number;
-};
+// type totalNumType = {
+//   sum: number;
+// };
 function Page() {
-  const [total, setTotal] = useState<totalNumType>(0);
+  const [total, setTotal] = useState(0);
   const [products, setProducts] = useState<products[]>([]);
   const [newCardProduct, setnewCardProduct] = useState<newCardProductType[]>(
     []
@@ -79,7 +79,11 @@ function Page() {
       count: 1,
     };
     console.log(newCardProduct);
-  
+
+    // setnewCardProduct((prev) => {
+
+    // })
+
     setnewCardProduct((prev) => {
       const sameId = prev.find(
         (prevProduct: newCardProductType) =>
@@ -96,6 +100,7 @@ function Page() {
       }
     });
   };
+
   const deleteBtn = (id: number) => {
     const filtered = products.filter((product) => {
       return product.id !== id;
@@ -105,13 +110,6 @@ function Page() {
       return cartProduct.id !== id;
     });
     setnewCardProduct(filteredCart);
-  };
-
-  const totalNum = (total: newCardProductType) => {
-    let sum = 0;
-     sum = sum + total.productPrice * total.count ;
-     setTotal(sum)
-    console.log(sum, "total");
   };
 
   console.log(newCardProduct, "card");
@@ -234,7 +232,7 @@ function Page() {
             })}
             <div className="flex justify-between p-4">
               <div className="font-bold">Total:</div>
-              <div className="font-bold">$</div>
+               ${newCardProduct.reduce((total, item) => total + item.productPrice * item.count, 0)}
             </div>
           </div>
         </div>
